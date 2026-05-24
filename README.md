@@ -312,3 +312,23 @@ You'll receive messages like:
 {"id":"uuid","status":"queued","channel":"sms","updated_at":"..."}
 {"id":"uuid","status":"delivered","channel":"sms","updated_at":"..."}
 ```
+
+## Observability in Action
+
+**Prometheus** — Real-time metrics (created, delivered, failed, latency):
+
+![Prometheus](docs/screenshots/prometheus-screenshot.png)
+
+**Grafana** — Pre-configured dashboard with delivery rates and latency percentiles:
+
+![Grafana](docs/screenshots/grafana-screenshot.png)
+
+**Jaeger** — Distributed tracing across API, Kafka, and Worker:
+
+![Jaeger Trace](docs/screenshots/jaeger-notification.png)
+
+![Jaeger Worker](docs/screenshots/jaeger-notification-worker.png)
+
+**Webhook.site** — Live delivery verification:
+
+![Webhook Deliveries](docs/screenshots/webhook.site.png)
