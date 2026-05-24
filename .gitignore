@@ -1,25 +1,12 @@
 # Binaries
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-api-server
+/api-server
 /worker
-
-# Test
-*.test
-*.out
-coverage.html
-
-# Dependencies
-/vendor/
+*.exe
 
 # IDE
 .idea/
 .vscode/
 *.swp
-*.swo
 
 # OS
 .DS_Store
@@ -27,7 +14,14 @@ Thumbs.db
 
 # Environment
 .env
+*.env.local
 
-# Build
-/bin/
-/dist/
+# Test
+coverage.out
+coverage.html
+
+# Docker
+docker-compose.override.yml
+
+# Vendor (optional)
+# vendor/
