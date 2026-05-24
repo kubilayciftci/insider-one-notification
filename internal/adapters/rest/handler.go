@@ -19,10 +19,11 @@ import (
 type Handler struct {
 	svc    *service.NotificationService
 	logger *slog.Logger
+	wsHub  *WSHub
 }
 
-func NewHandler(svc *service.NotificationService, logger *slog.Logger) *Handler {
-	return &Handler{svc: svc, logger: logger}
+func NewHandler(svc *service.NotificationService, logger *slog.Logger, wsHub *WSHub) *Handler {
+	return &Handler{svc: svc, logger: logger, wsHub: wsHub}
 }
 
 func (h *Handler) Routes() chi.Router {
@@ -34,6 +35,7 @@ func (h *Handler) Routes() chi.Router {
 	r.Delete("/notifications/{id}", h.CancelNotification)
 	r.Get("/notifications", h.ListNotifications)
 	r.Get("/health", h.HealthCheck)
+	r.Get("/ws/notifications/{id}", h.wsHub.HandleWebSocket)
 	return r
 }
 
