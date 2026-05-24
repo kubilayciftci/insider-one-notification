@@ -209,12 +209,22 @@ All settings are configurable via environment variables:
 | `API_PORT` | `:8080` | HTTP server port |
 | `DATABASE_URL` | `postgres://...` | PostgreSQL connection string |
 | `KAFKA_BROKERS` | `localhost:9092` | Comma-separated Kafka brokers |
-| `WEBHOOK_URL` | — | webhook.site URL for delivery simulation |
+| `WEBHOOK_URL` | `https://webhook.site/test` | Delivery endpoint (webhook.site for dev, real provider for prod) |
 | `RATE_LIMIT_PER_SEC` | `100` | Max messages per second per channel (configurable) |
 | `MAX_RETRIES` | `3` | Max delivery retry attempts |
 | `BASE_RETRY_DELAY` | `5s` | Base delay for exponential backoff |
 | `JAEGER_ENDPOINT` | `http://localhost:4318/v1/traces` | OTel trace exporter |
 | `SERVICE_NAME` | `insider-one-notification` | Service name for traces/logs |
+
+### Production Delivery Strategy
+
+In development, `WEBHOOK_URL` points to [webhook.site](https://webhook.site) for delivery simulation. In production, the `Notifier` port (`internal/core/ports/notifier.go`) is the integration point for real providers:
+
+1. Implement the `Notifier` interface for each provider (e.g., Twilio for SMS, SendGrid for Email, Firebase for Push)
+2. Select the adapter at startup based on environment configuration
+3. Each channel can use a different provider — the hexagonal architecture keeps provider logic fully isolated from business rules
+
+No core or service changes required — only new adapter implementations under `internal/adapters/`.
 
 ## Bonus Features
 
