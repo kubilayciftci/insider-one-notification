@@ -286,6 +286,8 @@ curl -X POST http://localhost:8000/api/v1/notifications \
 
 ### Scheduled Notification Example
 
+The `scheduled_at` field accepts RFC 3339 timestamps. All times are stored and compared in UTC. Use the `Z` suffix for UTC or include an explicit offset (e.g., `+03:00` for UTC+3).
+
 ```bash
 curl -X POST http://localhost:8000/api/v1/notifications \
   -H "Content-Type: application/json" \
