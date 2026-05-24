@@ -5,7 +5,7 @@
 *.so
 *.dylib
 api-server
-worker
+/worker
 
 # Test
 *.test
