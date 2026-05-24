@@ -14,7 +14,7 @@ TOPICS=(
 
 for TOPIC in "${TOPICS[@]}"; do
   echo "Creating topic: $TOPIC"
-  /opt/bitnami/kafka/bin/kafka-topics.sh \
+  /opt/kafka/bin/kafka-topics.sh \
     --create \
     --if-not-exists \
     --bootstrap-server "$KAFKA_BROKER" \
