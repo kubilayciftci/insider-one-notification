@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/kubilayciftci/insider-one-notification/internal/adapters/kafka"
@@ -54,6 +55,8 @@ func main() {
 		cfg.MaxRetries,
 		cfg.BaseRetryDelay,
 	)
+
+	go w.StartScheduler(ctx, 10*time.Second)
 
 	go func() {
 		mux := http.NewServeMux()

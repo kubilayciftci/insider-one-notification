@@ -46,8 +46,28 @@ func (s *NotificationService) Create(ctx context.Context, req CreateRequest) (*d
 		n.Payload = req.Payload
 	}
 
+	if req.Payload != nil {
+		if templateVars, ok := req.Payload["template_vars"].(map[string]any); ok {
+			vars := make(map[string]string, len(templateVars))
+			for k, v := range templateVars {
+				vars[k] = fmt.Sprintf("%v", v)
+			}
+			n.Content = domain.ResolveTemplate(n.Content, vars)
+		}
+	}
+
+	n.ScheduledAt = req.ScheduledAt
+
 	if err := s.repo.Create(ctx, n); err != nil {
 		return nil, fmt.Errorf("persist notification: %w", err)
+	}
+
+	if n.ScheduledAt != nil && n.ScheduledAt.After(time.Now()) {
+		s.logger.InfoContext(ctx, "notification scheduled for future delivery",
+			slog.String("id", n.ID.String()),
+			slog.Time("scheduled_at", *n.ScheduledAt),
+		)
+		return n, nil
 	}
 
 	if err := s.repo.UpdateStatus(ctx, n.ID, domain.StatusQueued); err != nil {
