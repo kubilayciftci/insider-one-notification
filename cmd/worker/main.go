@@ -44,12 +44,14 @@ func main() {
 	producer := kafka.NewProducer(cfg.KafkaBrokers)
 	defer producer.Close()
 	notifier := webhook.NewClient(cfg.WebhookURL, 10)
+	metrics := telemetry.NewMetrics()
 
 	w := worker.New(
 		repo,
 		notifier,
 		producer,
 		logger,
+		metrics,
 		cfg.KafkaBrokers,
 		cfg.RateLimitPerSec,
 		cfg.MaxRetries,

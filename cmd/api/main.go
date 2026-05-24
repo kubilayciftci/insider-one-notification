@@ -52,9 +52,10 @@ func main() {
 	defer producer.Close()
 
 	svc := service.NewNotificationService(repo, producer, logger)
+	metrics := telemetry.NewMetrics()
 	wsHub := rest.NewWSHub(logger)
 	go wsHub.ListenPostgres(ctx, pool)
-	handler := rest.NewHandler(svc, logger, wsHub)
+	handler := rest.NewHandler(svc, logger, wsHub, metrics)
 
 	router := chi.NewRouter()
 	router.Use(chimiddleware.Recoverer)

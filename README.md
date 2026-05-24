@@ -49,10 +49,11 @@ A scalable, event-driven notification delivery system built with Go, designed to
 git clone https://github.com/kubilayciftci/insider-one-notification.git
 cd insider-one-notification
 
-# Optional: Set your webhook.site URL
+# Get a free webhook URL to see real deliveries
+# Visit https://webhook.site and copy your unique URL
 export WEBHOOK_URL=https://webhook.site/your-uuid
 
-# Boot the entire ecosystem
+# Boot the entire ecosystem (works without WEBHOOK_URL too — uses a default endpoint)
 docker-compose up --build
 ```
 

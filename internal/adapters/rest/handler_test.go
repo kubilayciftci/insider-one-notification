@@ -14,6 +14,7 @@ import (
 	"github.com/kubilayciftci/insider-one-notification/internal/core/domain"
 	"github.com/kubilayciftci/insider-one-notification/internal/core/ports/mocks"
 	"github.com/kubilayciftci/insider-one-notification/internal/core/service"
+	"github.com/kubilayciftci/insider-one-notification/internal/telemetry"
 	"go.uber.org/mock/gomock"
 )
 
@@ -22,7 +23,7 @@ func setupHandler(t *testing.T) (*Handler, *mocks.MockNotificationRepository, *m
 	repo := mocks.NewMockNotificationRepository(ctrl)
 	queue := mocks.NewMockMessageQueue(ctrl)
 	svc := service.NewNotificationService(repo, queue, slog.Default())
-	handler := NewHandler(svc, slog.Default(), NewWSHub(slog.Default()))
+	handler := NewHandler(svc, slog.Default(), NewWSHub(slog.Default()), telemetry.NewMetrics())
 	return handler, repo, queue
 }
 

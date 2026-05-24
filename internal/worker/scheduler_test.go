@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/kubilayciftci/insider-one-notification/internal/core/domain"
 	"github.com/kubilayciftci/insider-one-notification/internal/core/ports/mocks"
+	"github.com/kubilayciftci/insider-one-notification/internal/telemetry"
 	"go.uber.org/mock/gomock"
 )
 
@@ -18,7 +19,7 @@ func TestWorker_ProcessDueNotifications(t *testing.T) {
 	queue := mocks.NewMockMessageQueue(ctrl)
 	notifier := mocks.NewMockNotifier(ctrl)
 
-	w := New(repo, notifier, queue, slog.Default(), nil, 100, 3, 5*time.Second)
+	w := New(repo, notifier, queue, slog.Default(), telemetry.NewMetrics(), nil, 100, 3, 5*time.Second)
 
 	pastTime := time.Now().Add(-1 * time.Hour)
 	notifications := []*domain.Notification{

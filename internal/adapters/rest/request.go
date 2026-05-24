@@ -16,11 +16,3 @@ type CreateBatchRequest struct {
 	Notifications []CreateNotificationRequest `json:"notifications"`
 }
 
-type ListQueryParams struct {
-	Status   string `json:"status"`
-	Channel  string `json:"channel"`
-	FromDate string `json:"from_date"`
-	ToDate   string `json:"to_date"`
-	Page     int    `json:"page"`
-	PageSize int    `json:"page_size"`
-}

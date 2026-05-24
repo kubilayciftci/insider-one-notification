@@ -1,6 +1,8 @@
 package telemetry
 
 import (
+	"sync"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
@@ -16,48 +18,48 @@ type Metrics struct {
 	HTTPRequestsTotal      *prometheus.CounterVec
 }
 
+var (
+	metricsOnce     sync.Once
+	metricsInstance *Metrics
+)
+
 func NewMetrics() *Metrics {
-	return &Metrics{
-		NotificationsCreated: promauto.NewCounterVec(prometheus.CounterOpts{
-			Name: "notifications_created_total",
-			Help: "Total number of notifications created",
-		}, []string{"channel", "priority"}),
+	metricsOnce.Do(func() {
+		metricsInstance = &Metrics{
+			NotificationsCreated: promauto.NewCounterVec(prometheus.CounterOpts{
+				Name: "notifications_created_total",
+			}, []string{"channel", "priority"}),
 
-		NotificationsDelivered: promauto.NewCounterVec(prometheus.CounterOpts{
-			Name: "notifications_delivered_total",
-			Help: "Total number of notifications successfully delivered",
-		}, []string{"channel"}),
+			NotificationsDelivered: promauto.NewCounterVec(prometheus.CounterOpts{
+				Name: "notifications_delivered_total",
+			}, []string{"channel"}),
 
-		NotificationsFailed: promauto.NewCounterVec(prometheus.CounterOpts{
-			Name: "notifications_failed_total",
-			Help: "Total number of notification delivery failures",
-		}, []string{"channel", "reason"}),
+			NotificationsFailed: promauto.NewCounterVec(prometheus.CounterOpts{
+				Name: "notifications_failed_total",
+			}, []string{"channel", "reason"}),
 
-		NotificationsRetried: promauto.NewCounterVec(prometheus.CounterOpts{
-			Name: "notifications_retried_total",
-			Help: "Total number of notification retries",
-		}, []string{"channel"}),
+			NotificationsRetried: promauto.NewCounterVec(prometheus.CounterOpts{
+				Name: "notifications_retried_total",
+			}, []string{"channel"}),
 
-		DeliveryLatency: promauto.NewHistogramVec(prometheus.HistogramOpts{
-			Name:    "notification_delivery_duration_seconds",
-			Help:    "Time to deliver a notification via webhook",
-			Buckets: prometheus.DefBuckets,
-		}, []string{"channel"}),
+			DeliveryLatency: promauto.NewHistogramVec(prometheus.HistogramOpts{
+				Name:    "notification_delivery_duration_seconds",
+				Buckets: prometheus.DefBuckets,
+			}, []string{"channel"}),
 
-		QueueDepth: promauto.NewGaugeVec(prometheus.GaugeOpts{
-			Name: "notification_queue_depth",
-			Help: "Current queue depth per channel",
-		}, []string{"channel"}),
+			QueueDepth: promauto.NewGaugeVec(prometheus.GaugeOpts{
+				Name: "notification_queue_depth",
+			}, []string{"channel"}),
 
-		HTTPRequestDuration: promauto.NewHistogramVec(prometheus.HistogramOpts{
-			Name:    "http_request_duration_seconds",
-			Help:    "HTTP request latency",
-			Buckets: prometheus.DefBuckets,
-		}, []string{"method", "path", "status"}),
+			HTTPRequestDuration: promauto.NewHistogramVec(prometheus.HistogramOpts{
+				Name:    "http_request_duration_seconds",
+				Buckets: prometheus.DefBuckets,
+			}, []string{"method", "path", "status"}),
 
-		HTTPRequestsTotal: promauto.NewCounterVec(prometheus.CounterOpts{
-			Name: "http_requests_total",
-			Help: "Total HTTP requests",
-		}, []string{"method", "path", "status"}),
-	}
+			HTTPRequestsTotal: promauto.NewCounterVec(prometheus.CounterOpts{
+				Name: "http_requests_total",
+			}, []string{"method", "path", "status"}),
+		}
+	})
+	return metricsInstance
 }

@@ -13,17 +13,19 @@ import (
 	"github.com/kubilayciftci/insider-one-notification/internal/core/domain"
 	"github.com/kubilayciftci/insider-one-notification/internal/core/ports"
 	"github.com/kubilayciftci/insider-one-notification/internal/core/service"
+	"github.com/kubilayciftci/insider-one-notification/internal/telemetry"
 	"go.opentelemetry.io/otel/trace"
 )
 
 type Handler struct {
-	svc    *service.NotificationService
-	logger *slog.Logger
-	wsHub  *WSHub
+	svc     *service.NotificationService
+	logger  *slog.Logger
+	wsHub   *WSHub
+	metrics *telemetry.Metrics
 }
 
-func NewHandler(svc *service.NotificationService, logger *slog.Logger, wsHub *WSHub) *Handler {
-	return &Handler{svc: svc, logger: logger, wsHub: wsHub}
+func NewHandler(svc *service.NotificationService, logger *slog.Logger, wsHub *WSHub, metrics *telemetry.Metrics) *Handler {
+	return &Handler{svc: svc, logger: logger, wsHub: wsHub, metrics: metrics}
 }
 
 func (h *Handler) Routes() chi.Router {
@@ -67,6 +69,7 @@ func (h *Handler) CreateNotification(w http.ResponseWriter, r *http.Request) {
 		Content:        req.Content,
 		Priority:       priority,
 		IdempotencyKey: req.IdempotencyKey,
+		ScheduledAt:    req.ScheduledAt,
 		Payload:        req.Payload,
 	})
 	if err != nil {
@@ -74,6 +77,7 @@ func (h *Handler) CreateNotification(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.metrics.NotificationsCreated.WithLabelValues(string(channel), string(priority)).Inc()
 	writeJSON(w, http.StatusAccepted, toNotificationResponse(n))
 }
 

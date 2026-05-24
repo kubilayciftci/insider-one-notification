@@ -11,6 +11,7 @@ import (
 	"github.com/kubilayciftci/insider-one-notification/internal/adapters/kafka"
 	"github.com/kubilayciftci/insider-one-notification/internal/core/domain"
 	"github.com/kubilayciftci/insider-one-notification/internal/core/ports"
+	"github.com/kubilayciftci/insider-one-notification/internal/telemetry"
 	"go.opentelemetry.io/otel"
 	"golang.org/x/time/rate"
 )
@@ -22,6 +23,7 @@ type Worker struct {
 	notifier        ports.Notifier
 	queue           ports.MessageQueue
 	logger          *slog.Logger
+	metrics         *telemetry.Metrics
 	rateLimitPerSec int
 	maxRetries      int
 	baseRetryDelay  time.Duration
@@ -33,6 +35,7 @@ func New(
 	notifier ports.Notifier,
 	queue ports.MessageQueue,
 	logger *slog.Logger,
+	metrics *telemetry.Metrics,
 	brokers []string,
 	rateLimitPerSec int,
 	maxRetries int,
@@ -43,6 +46,7 @@ func New(
 		notifier:        notifier,
 		queue:           queue,
 		logger:          logger,
+		metrics:         metrics,
 		rateLimitPerSec: rateLimitPerSec,
 		maxRetries:      maxRetries,
 		baseRetryDelay:  baseRetryDelay,
@@ -116,10 +120,17 @@ func (w *Worker) processNotification(ctx context.Context, n *domain.Notification
 			slog.String("id", n.ID.String()), slog.Any("error", err))
 	}
 
+	start := time.Now()
 	result, err := w.notifier.Send(ctx, n)
+	duration := time.Since(start).Seconds()
+	w.metrics.DeliveryLatency.WithLabelValues(string(n.Channel)).Observe(duration)
+
 	if err != nil {
+		w.metrics.NotificationsFailed.WithLabelValues(string(n.Channel), "send_error").Inc()
 		return w.handleFailure(ctx, n, err)
 	}
+
+	w.metrics.NotificationsDelivered.WithLabelValues(string(n.Channel)).Inc()
 
 	if err := w.repo.UpdateStatus(ctx, n.ID, domain.StatusDelivered); err != nil {
 		w.logger.ErrorContext(ctx, "update status to delivered failed",
@@ -141,6 +152,8 @@ func (w *Worker) handleFailure(ctx context.Context, n *domain.Notification, send
 			slog.String("id", n.ID.String()), slog.Any("error", err))
 	}
 	n.RetryCount++
+
+	w.metrics.NotificationsRetried.WithLabelValues(string(n.Channel)).Inc()
 
 	if n.RetryCount >= w.maxRetries {
 		w.logger.WarnContext(ctx, "max retries exceeded, routing to DLQ",
