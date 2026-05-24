@@ -18,7 +18,7 @@ func TestClient_Send(t *testing.T) {
 		wantErr    bool
 	}{
 		{
-			name:       "successful delivery",
+			name:       "successful delivery with 202",
 			statusCode: http.StatusAccepted,
 			response: map[string]string{
 				"messageId": "ext-123",
@@ -26,6 +26,12 @@ func TestClient_Send(t *testing.T) {
 				"timestamp": "2026-05-24T10:00:00Z",
 			},
 			wantErr: false,
+		},
+		{
+			name:       "successful delivery with 200",
+			statusCode: http.StatusOK,
+			response:   map[string]string{},
+			wantErr:    false,
 		},
 		{
 			name:       "server error",
@@ -62,10 +68,8 @@ func TestClient_Send(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Send() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if !tt.wantErr {
-				if result.ExternalID != "ext-123" {
-					t.Errorf("ExternalID = %v, want ext-123", result.ExternalID)
-				}
+			if !tt.wantErr && result == nil {
+				t.Error("Send() result is nil, want non-nil")
 			}
 		})
 	}

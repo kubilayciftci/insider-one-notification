@@ -13,24 +13,6 @@
       "capacity": 500,
       "every": "1s"
     },
-    "telemetry/opentelemetry": {
-      "service_name": "insider-krakend",
-      "trace_sample_rate": 1.0,
-      "exporters": {
-        "otlp": [
-          {
-            "host": "jaeger",
-            "port": 4318,
-            "use_http": true
-          }
-        ]
-      },
-      "layers": {
-        "global": { "report_headers": true },
-        "proxy": { "report_headers": true },
-        "backend": { "report_headers": true }
-      }
-    },
     "modifier/martian": {
       "header.Id": {
         "scope": ["request"],
@@ -42,12 +24,14 @@
     {
       "endpoint": "/api/v1/notifications",
       "method": "POST",
+      "output_encoding": "no-op",
       "input_headers": ["Content-Type", "X-Trace-Id", "X-Idempotency-Key", "Traceparent", "Tracestate"],
       "backend": [
         {
           "url_pattern": "/api/v1/notifications",
           "host": ["http://api:8080"],
-          "method": "POST"
+          "method": "POST",
+          "encoding": "no-op"
         }
       ],
       "extra_config": {
@@ -61,68 +45,80 @@
     {
       "endpoint": "/api/v1/notifications/batch",
       "method": "POST",
+      "output_encoding": "no-op",
       "input_headers": ["Content-Type", "X-Trace-Id", "Traceparent", "Tracestate"],
       "backend": [
         {
           "url_pattern": "/api/v1/notifications/batch",
           "host": ["http://api:8080"],
-          "method": "POST"
+          "method": "POST",
+          "encoding": "no-op"
         }
       ]
     },
     {
       "endpoint": "/api/v1/notifications/{id}",
       "method": "GET",
+      "output_encoding": "no-op",
       "input_headers": ["X-Trace-Id", "Traceparent", "Tracestate"],
       "backend": [
         {
           "url_pattern": "/api/v1/notifications/{id}",
-          "host": ["http://api:8080"]
+          "host": ["http://api:8080"],
+          "encoding": "no-op"
         }
       ]
     },
     {
       "endpoint": "/api/v1/notifications/{id}",
       "method": "DELETE",
+      "output_encoding": "no-op",
       "input_headers": ["X-Trace-Id", "Traceparent", "Tracestate"],
       "backend": [
         {
           "url_pattern": "/api/v1/notifications/{id}",
           "host": ["http://api:8080"],
-          "method": "DELETE"
+          "method": "DELETE",
+          "encoding": "no-op"
         }
       ]
     },
     {
       "endpoint": "/api/v1/notifications/batch/{batchId}",
       "method": "GET",
+      "output_encoding": "no-op",
       "input_headers": ["X-Trace-Id", "Traceparent", "Tracestate"],
       "backend": [
         {
           "url_pattern": "/api/v1/notifications/batch/{batchId}",
-          "host": ["http://api:8080"]
+          "host": ["http://api:8080"],
+          "encoding": "no-op"
         }
       ]
     },
     {
       "endpoint": "/api/v1/notifications",
       "method": "GET",
+      "output_encoding": "no-op",
       "input_headers": ["X-Trace-Id", "Traceparent", "Tracestate"],
       "input_query_strings": ["status", "channel", "from_date", "to_date", "page", "page_size"],
       "backend": [
         {
           "url_pattern": "/api/v1/notifications",
-          "host": ["http://api:8080"]
+          "host": ["http://api:8080"],
+          "encoding": "no-op"
         }
       ]
     },
     {
       "endpoint": "/api/v1/health",
       "method": "GET",
+      "output_encoding": "no-op",
       "backend": [
         {
           "url_pattern": "/api/v1/health",
-          "host": ["http://api:8080"]
+          "host": ["http://api:8080"],
+          "encoding": "no-op"
         }
       ]
     }

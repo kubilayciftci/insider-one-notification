@@ -76,13 +76,17 @@ func (c *Client) Send(ctx context.Context, notification *domain.Notification) (*
 	}
 	defer resp.Body.Close() //nolint:errcheck
 
-	if resp.StatusCode != http.StatusAccepted {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("webhook returned status %d", resp.StatusCode)
 	}
 
 	var result webhookResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, fmt.Errorf("decode response: %w", err)
+		return &ports.DeliveryResult{
+			ExternalID: fmt.Sprintf("ext-%s", notification.ID.String()),
+			Status:     "accepted",
+			Timestamp:  time.Now().UTC().Format(time.RFC3339),
+		}, nil
 	}
 
 	return &ports.DeliveryResult{

@@ -63,6 +63,7 @@ docker-compose up --build
 |-------------|------------------------------|
 | API Gateway | http://localhost:8000         |
 | API Direct  | http://localhost:8080         |
+| Swagger UI  | http://localhost:8081         |
 | Grafana     | http://localhost:3000         |
 | Jaeger UI   | http://localhost:16686        |
 | Prometheus  | http://localhost:9090         |
@@ -117,6 +118,8 @@ curl -X DELETE http://localhost:8000/api/v1/notifications/{id}
 
 ## Running Tests
 
+**Prerequisites:** Go 1.26+, Docker (for integration tests)
+
 ```bash
 # Unit tests
 make test-unit
@@ -130,6 +133,31 @@ make test
 # Linting
 make lint
 ```
+
+### Smoke Test (Full Feature Verification)
+
+With `docker-compose up --build` running, execute the smoke test to verify all features:
+
+```bash
+./scripts/smoke-test.sh
+```
+
+**Covers 18 scenarios:** health check, single notification (SMS/Email/Push), batch creation, query by ID/batch ID, template variable resolution, idempotency duplicate detection, list with filters (status, channel), cancel notification, validation errors (invalid channel, empty recipient, empty content), scheduled notifications, and WebSocket real-time status updates.
+
+**Manual WebSocket testing:**
+
+```bash
+# Option 1: wscat (npm install -g wscat)
+wscat -c ws://localhost:8080/api/v1/ws/notifications/{id}
+
+# Option 2: Postman
+# New Request → WebSocket → ws://localhost:8080/api/v1/ws/notifications/{id} → Connect
+```
+
+## API Documentation
+
+- **OpenAPI 3.0 Spec:** [`api/openapi.yaml`](api/openapi.yaml) — live at http://localhost:8081 (Swagger UI) after `docker-compose up`
+- **Postman Collection:** [`api/postman_collection.json`](api/postman_collection.json) — Postman → Import → select file → all 13 requests ready to use (includes WebSocket)
 
 ## Project Structure
 
@@ -150,7 +178,7 @@ make lint
 │   ├── telemetry/    # OTel, Prometheus, slog
 │   └── worker/       # Worker orchestration
 ├── migrations/       # Versioned SQL migrations
-├── api/              # OpenAPI 3.0 specification
+├── api/              # OpenAPI 3.0 spec + Postman collection
 ├── deploy/k8s/       # Kubernetes + ArgoCD manifests
 └── docker-compose.yml
 ```

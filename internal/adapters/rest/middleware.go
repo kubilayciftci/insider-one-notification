@@ -1,7 +1,10 @@
 package rest
 
 import (
+	"bufio"
+	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"time"
 
@@ -64,4 +67,11 @@ type responseWriter struct {
 func (rw *responseWriter) WriteHeader(code int) {
 	rw.statusCode = code
 	rw.ResponseWriter.WriteHeader(code)
+}
+
+func (rw *responseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	if hj, ok := rw.ResponseWriter.(http.Hijacker); ok {
+		return hj.Hijack()
+	}
+	return nil, nil, fmt.Errorf("underlying ResponseWriter does not support Hijack")
 }

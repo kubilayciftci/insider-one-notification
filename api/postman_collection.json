@@ -1,0 +1,134 @@
+{
+  "info": {
+    "name": "Insider One Notification API",
+    "description": "Event-driven notification delivery system",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8000/api/v1" },
+    { "key": "directUrl", "value": "http://localhost:8080/api/v1" },
+    { "key": "notificationId", "value": "REPLACE_WITH_ID" },
+    { "key": "batchId", "value": "REPLACE_WITH_BATCH_ID" }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/health"
+      }
+    },
+    {
+      "name": "Create SMS Notification",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/notifications",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"recipient\": \"+905551234567\",\n  \"channel\": \"sms\",\n  \"content\": \"Your verification code is 123456\",\n  \"priority\": \"high\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Create Email Notification",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/notifications",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"recipient\": \"user@example.com\",\n  \"channel\": \"email\",\n  \"content\": \"Welcome to Insider One!\",\n  \"priority\": \"normal\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Create Push Notification",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/notifications",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"recipient\": \"device-token-abc123\",\n  \"channel\": \"push\",\n  \"content\": \"You have a new message\",\n  \"priority\": \"low\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Create with Template Variables",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/notifications",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"recipient\": \"+905551234567\",\n  \"channel\": \"sms\",\n  \"content\": \"Hi {{name}}, your order {{order_id}} is confirmed!\",\n  \"priority\": \"high\",\n  \"payload\": {\n    \"template_vars\": {\n      \"name\": \"Kubilay\",\n      \"order_id\": \"ORD-98765\"\n    }\n  }\n}"
+        }
+      }
+    },
+    {
+      "name": "Create Scheduled Notification",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/notifications",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"recipient\": \"+905551234567\",\n  \"channel\": \"sms\",\n  \"content\": \"Flash sale starts NOW!\",\n  \"priority\": \"high\",\n  \"scheduled_at\": \"2026-12-01T09:00:00Z\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Create with Idempotency Key",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/notifications",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"recipient\": \"+905551234567\",\n  \"channel\": \"sms\",\n  \"content\": \"Idempotent message\",\n  \"priority\": \"normal\",\n  \"idempotency_key\": \"unique-key-123\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Create Batch",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/notifications/batch",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"notifications\": [\n    {\"recipient\": \"+905551111111\", \"channel\": \"sms\", \"content\": \"Flash sale!\", \"priority\": \"high\"},\n    {\"recipient\": \"user@example.com\", \"channel\": \"email\", \"content\": \"Check this out\", \"priority\": \"normal\"},\n    {\"recipient\": \"device-xyz\", \"channel\": \"push\", \"content\": \"New update\", \"priority\": \"low\"}\n  ]\n}"
+        }
+      }
+    },
+    {
+      "name": "Get Notification by ID",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/notifications/{{notificationId}}"
+      }
+    },
+    {
+      "name": "Get Batch by ID",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/notifications/batch/{{batchId}}"
+      }
+    },
+    {
+      "name": "List Notifications",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/notifications?status=delivered&channel=sms&page=1&page_size=20"
+      }
+    },
+    {
+      "name": "Cancel Notification",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/notifications/{{notificationId}}"
+      }
+    }
+  ]
+}

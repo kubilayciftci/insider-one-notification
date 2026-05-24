@@ -29,6 +29,8 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
     ports:
       - "9092:9092"
     healthcheck:
@@ -125,6 +127,16 @@ services:
         condition: service_completed_successfully
       jaeger:
         condition: service_started
+
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    container_name: insider-swagger
+    environment:
+      SWAGGER_JSON: /api/openapi.yaml
+    volumes:
+      - ./api/openapi.yaml:/api/openapi.yaml
+    ports:
+      - "8081:8080"
 
   krakend:
     image: devopsfaith/krakend:2.6
