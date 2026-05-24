@@ -51,7 +51,7 @@ func TestClient_Send(t *testing.T) {
 					t.Errorf("content-type = %s, want application/json", r.Header.Get("Content-Type"))
 				}
 				w.WriteHeader(tt.statusCode)
-				json.NewEncoder(w).Encode(tt.response)
+				_ = json.NewEncoder(w).Encode(tt.response)
 			}))
 			defer server.Close()
 

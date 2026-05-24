@@ -74,7 +74,7 @@ func (c *Client) Send(ctx context.Context, notification *domain.Notification) (*
 	if err != nil {
 		return nil, fmt.Errorf("send webhook: %w", err)
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	if resp.StatusCode != http.StatusAccepted {
 		return nil, fmt.Errorf("webhook returned status %d", resp.StatusCode)

@@ -141,7 +141,7 @@ func TestHandler_ListNotifications(t *testing.T) {
 	}
 
 	var resp ListResponse
-	json.NewDecoder(w.Body).Decode(&resp)
+	_ = json.NewDecoder(w.Body).Decode(&resp)
 	if resp.Total != 2 {
 		t.Errorf("total = %d, want 2", resp.Total)
 	}

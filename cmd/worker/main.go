@@ -31,7 +31,7 @@ func main() {
 		logger.Error("init tracer failed", slog.Any("error", err))
 		os.Exit(1)
 	}
-	defer shutdownTracer(ctx)
+	defer shutdownTracer(ctx) //nolint:errcheck
 
 	pool, err := pgxpool.New(ctx, cfg.DatabaseURL)
 	if err != nil {
@@ -42,7 +42,7 @@ func main() {
 
 	repo := pgadapter.NewRepository(pool)
 	producer := kafka.NewProducer(cfg.KafkaBrokers)
-	defer producer.Close()
+	defer producer.Close() //nolint:errcheck
 	notifier := webhook.NewClient(cfg.WebhookURL, 10)
 	metrics := telemetry.NewMetrics()
 
@@ -65,7 +65,7 @@ func main() {
 		mux.Handle("/metrics", promhttp.Handler())
 		mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{"status":"ok"}`))
+			_, _ = w.Write([]byte(`{"status":"ok"}`))
 		})
 		logger.Info("worker metrics server starting", slog.String("port", ":9090"))
 		if err := http.ListenAndServe(":9090", mux); err != nil {

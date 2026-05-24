@@ -61,7 +61,7 @@ func (r *Repository) CreateBatch(ctx context.Context, notifications []*domain.No
 	}
 
 	br := r.pool.SendBatch(ctx, batch)
-	defer br.Close()
+	defer br.Close() //nolint:errcheck
 
 	for range notifications {
 		if _, err := br.Exec(); err != nil {

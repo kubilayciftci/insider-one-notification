@@ -72,7 +72,7 @@ func (h *WSHub) Broadcast(update StatusUpdate) {
 	for conn := range conns {
 		if err := conn.WriteMessage(websocket.TextMessage, data); err != nil {
 			h.logger.Warn("ws write failed", slog.Any("error", err))
-			conn.Close()
+			_ = conn.Close()
 			delete(conns, conn)
 		}
 	}
@@ -97,7 +97,7 @@ func (h *WSHub) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		defer func() {
 			h.Unsubscribe(notificationID, conn)
-			conn.Close()
+			_ = conn.Close()
 		}()
 		for {
 			if _, _, err := conn.ReadMessage(); err != nil {

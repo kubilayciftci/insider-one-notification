@@ -36,7 +36,7 @@ func main() {
 		logger.Error("init tracer failed", slog.Any("error", err))
 		os.Exit(1)
 	}
-	defer shutdownTracer(ctx)
+	defer shutdownTracer(ctx) //nolint:errcheck
 
 	runMigrations(cfg.DatabaseURL, logger)
 
@@ -49,7 +49,7 @@ func main() {
 
 	repo := pgadapter.NewRepository(pool)
 	producer := kafka.NewProducer(cfg.KafkaBrokers)
-	defer producer.Close()
+	defer producer.Close() //nolint:errcheck
 
 	svc := service.NewNotificationService(repo, producer, logger)
 	metrics := telemetry.NewMetrics()
@@ -101,7 +101,7 @@ func runMigrations(databaseURL string, logger *slog.Logger) {
 		logger.Error("create migrator failed", slog.Any("error", err))
 		os.Exit(1)
 	}
-	defer m.Close()
+	defer m.Close() //nolint:errcheck
 
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		logger.Error("run migrations failed", slog.Any("error", err))

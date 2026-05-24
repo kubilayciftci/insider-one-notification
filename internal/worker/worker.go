@@ -67,7 +67,7 @@ func (w *Worker) Start(ctx context.Context) error {
 			consumer := kafka.NewConsumer(w.brokers, topic, "notification-workers", w.logger)
 
 			go func(ch domain.Channel, p domain.Priority, consumer *kafka.Consumer, limiter *rate.Limiter) {
-				defer consumer.Close()
+				defer consumer.Close() //nolint:errcheck
 				w.logger.Info("starting worker",
 					slog.String("channel", string(ch)),
 					slog.String("priority", string(p)),
@@ -90,7 +90,7 @@ func (w *Worker) Start(ctx context.Context) error {
 			"notification-retry-workers",
 			w.logger,
 		)
-		defer retryConsumer.Close()
+		defer retryConsumer.Close() //nolint:errcheck
 		w.logger.Info("starting retry worker")
 
 		err := w.consumeRetry(ctx, retryConsumer)
