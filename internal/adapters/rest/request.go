@@ -1,11 +1,14 @@
 package rest
 
+import "time"
+
 type CreateNotificationRequest struct {
 	Recipient      string         `json:"recipient"`
 	Channel        string         `json:"channel"`
 	Content        string         `json:"content"`
 	Priority       string         `json:"priority"`
 	IdempotencyKey string         `json:"idempotency_key,omitempty"`
+	ScheduledAt    *time.Time     `json:"scheduled_at,omitempty"`
 	Payload        map[string]any `json:"payload,omitempty"`
 }
 
