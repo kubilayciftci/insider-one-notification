@@ -262,10 +262,12 @@ curl -X POST http://localhost:8000/api/v1/notifications \
 ### WebSocket Example
 
 ```bash
-# Subscribe to status updates
 wscat -c ws://localhost:8080/api/v1/ws/notifications/{id}
+```
 
-# You'll receive messages like:
-# {"id":"uuid","status":"queued","channel":"sms","updated_at":"..."}
-# {"id":"uuid","status":"delivered","channel":"sms","updated_at":"..."}
+You'll receive messages like:
+
+```json
+{"id":"uuid","status":"queued","channel":"sms","updated_at":"..."}
+{"id":"uuid","status":"delivered","channel":"sms","updated_at":"..."}
 ```
