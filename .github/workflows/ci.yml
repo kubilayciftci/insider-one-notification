@@ -48,9 +48,9 @@ jobs:
         with:
           go-version: "1.26"
       - name: Build API
-        run: go build ./cmd/api
+        run: go build -o api-server ./cmd/api
       - name: Build Worker
-        run: go build ./cmd/worker
+        run: go build -o worker ./cmd/worker
 
   docker:
     runs-on: ubuntu-latest
