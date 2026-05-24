@@ -61,7 +61,7 @@ docker-compose up --build
 
 | Service      | URL                          |
 |-------------|------------------------------|
-| API Gateway | http://localhost:8000         |
+| API Gateway (KrakenD) | http://localhost:8000         |
 | API Direct  | http://localhost:8080         |
 | Swagger UI  | http://localhost:8081         |
 | Grafana     | http://localhost:3000         |
@@ -118,7 +118,7 @@ curl -X DELETE http://localhost:8000/api/v1/notifications/{id}
 
 ## Running Tests
 
-**Prerequisites:** Go 1.26+, Docker (for integration tests)
+**Prerequisites:** Go 1.26+, Docker (for integration tests), Make
 
 ```bash
 # Unit tests
