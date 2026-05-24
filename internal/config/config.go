@@ -28,7 +28,7 @@ func Load() *Config {
 		RateLimitPerSec: envOrDefaultInt("RATE_LIMIT_PER_SEC", 100),
 		MaxRetries:      envOrDefaultInt("MAX_RETRIES", 3),
 		BaseRetryDelay:  envOrDefaultDuration("BASE_RETRY_DELAY", 5*time.Second),
-		JaegerEndpoint:  envOrDefault("JAEGER_ENDPOINT", "http://localhost:14268/api/traces"),
+		JaegerEndpoint:  envOrDefault("JAEGER_ENDPOINT", "http://localhost:4318/v1/traces"),
 		ServiceName:     envOrDefault("SERVICE_NAME", "insider-one-notification"),
 	}
 }
