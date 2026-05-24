@@ -184,3 +184,88 @@ make lint
 - **Logging:** log/slog (structured JSON)
 - **Migrations:** golang-migrate
 - **Testing:** testcontainers-go, go.uber.org/mock
+
+## Extensibility — Adding New Channels
+
+The hexagonal architecture makes adding new channels (e.g., WhatsApp, Telegram, Slack) trivial:
+
+1. Add the channel constant to `internal/core/domain/notification.go`:
+   ```go
+   ChannelWhatsApp Channel = "whatsapp"
+   ```
+2. Update `ParseChannel()` to accept the new value
+3. Create Kafka topics: `notifications-whatsapp-{high,normal,low}`
+4. Restart workers — they automatically consume from new topics
+
+**Zero database migrations required** — the JSONB `payload` column handles any channel-specific data.
+
+## Configuration
+
+All settings are configurable via environment variables:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `API_PORT` | `:8080` | HTTP server port |
+| `DATABASE_URL` | `postgres://...` | PostgreSQL connection string |
+| `KAFKA_BROKERS` | `localhost:9092` | Comma-separated Kafka brokers |
+| `WEBHOOK_URL` | — | webhook.site URL for delivery simulation |
+| `RATE_LIMIT_PER_SEC` | `100` | Max messages per second per channel (configurable) |
+| `MAX_RETRIES` | `3` | Max delivery retry attempts |
+| `BASE_RETRY_DELAY` | `5s` | Base delay for exponential backoff |
+| `JAEGER_ENDPOINT` | `http://localhost:4318/v1/traces` | OTel trace exporter |
+| `SERVICE_NAME` | `insider-one-notification` | Service name for traces/logs |
+
+## Bonus Features
+
+| Feature | Implementation |
+|---------|---------------|
+| **Failure Handling** | Exponential backoff with jitter + Dead Letter Queue |
+| **Scheduled Notifications** | `scheduled_at` field, scheduler worker polls DB |
+| **Template System** | `{{variable}}` substitution from `payload.template_vars` |
+| **WebSocket Updates** | Real-time status push via PostgreSQL LISTEN/NOTIFY |
+| **Distributed Tracing** | End-to-end OTel: KrakenD → API → Kafka → Worker → Webhook |
+| **GitHub Actions CI/CD** | Lint + unit tests + integration tests + Docker build |
+
+### Template Example
+
+```bash
+curl -X POST http://localhost:8000/api/v1/notifications \
+  -H "Content-Type: application/json" \
+  -d '{
+    "recipient": "+905551234567",
+    "channel": "sms",
+    "content": "Hi {{name}}, your order {{order_id}} is confirmed!",
+    "priority": "high",
+    "payload": {
+      "template_vars": {
+        "name": "Kubilay",
+        "order_id": "ORD-98765"
+      }
+    }
+  }'
+```
+
+### Scheduled Notification Example
+
+```bash
+curl -X POST http://localhost:8000/api/v1/notifications \
+  -H "Content-Type: application/json" \
+  -d '{
+    "recipient": "+905551234567",
+    "channel": "sms",
+    "content": "Flash sale starts NOW!",
+    "priority": "high",
+    "scheduled_at": "2026-05-25T09:00:00Z"
+  }'
+```
+
+### WebSocket Example
+
+```bash
+# Subscribe to status updates
+wscat -c ws://localhost:8080/api/v1/ws/notifications/{id}
+
+# You'll receive messages like:
+# {"id":"uuid","status":"queued","channel":"sms","updated_at":"..."}
+# {"id":"uuid","status":"delivered","channel":"sms","updated_at":"..."}
+```
